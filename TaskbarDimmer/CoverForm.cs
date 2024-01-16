@@ -56,20 +56,24 @@ namespace TaskbarDimmer
 			TopMost = true;
 			ShowInTaskbar = false;
 			BackColor = System.Drawing.Color.Black;
-			Opacity = 0;
 
-			this.Load += CoverForm_Load;
-		}
-
-		private void CoverForm_Load(object sender, EventArgs e)
-		{
-			isLoaded = true;
-			Opacity = 0.1;
-			MySize = 0;
-			MyPosition = TaskbarPosition.None;
-			ApplySettings();
+			double preferredOpacity = (100 - settings.Lightness.Clamp(1, 100)) / 100d;
+			Opacity = preferredOpacity; 
+			
 			this.Hide();
+
+			//this.Load += CoverForm_Load;
 		}
+
+		//private void CoverForm_Load(object sender, EventArgs e)
+		//{
+		//	isLoaded = true;
+		//	//Opacity = 0.1;
+		//	//MySize = 0;
+		//	//MyPosition = TaskbarPosition.None;
+		//	//ApplySettings();
+		//	//this.Hide();
+		//}
 		#region Make me transparent to clicks
 
 		const int WS_EX_LAYERED = 0x80000;
@@ -157,10 +161,7 @@ namespace TaskbarDimmer
 		{
 			double preferredOpacity = (100 - settings.Lightness.Clamp(1, 100)) / 100d;
 			if (Opacity != preferredOpacity)
-			{
-				Opacity = 0.2;
 				Opacity = preferredOpacity;
-			}
 
 			if (MySize != settings.Size)
 			{
@@ -235,7 +236,6 @@ namespace TaskbarDimmer
 					&& settings.Position != TaskbarPosition.Right))
 			{
 				this.Hide();
-				Opacity = 0;
 			}
 			else
 			{

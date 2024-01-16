@@ -28,6 +28,11 @@ namespace TaskbarDimmer
 		{
 			try
 			{
+				Directory.CreateDirectory(Globals.WritableDirectoryBase);
+				Directory.CreateDirectory(Globals.WritableDirectoryBase + "Logs/");
+				Globals.OverrideErrorFilePath(() => Globals.WritableDirectoryBase + "Logs/" + Globals.AssemblyName + "_" + DateTime.Now.Year + "_" + DateTime.Now.Month.ToString().PadLeft(2, '0') + ".txt");
+				Environment.CurrentDirectory = Globals.WritableDirectoryBase;
+
 				if (args.Length == 1)
 				{
 					try
@@ -51,8 +56,6 @@ namespace TaskbarDimmer
 				}
 				if (!SingleInstance.Start())
 					return 0;
-
-				Directory.CreateDirectory(Globals.WritableDirectoryBase);
 
 				Settings = new Settings();
 				Settings.Load();
