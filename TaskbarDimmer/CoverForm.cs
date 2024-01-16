@@ -1,6 +1,8 @@
 ﻿using BPUtil;
+using BPUtil.NativeWin;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Linq.Expressions;
@@ -132,12 +134,33 @@ namespace TaskbarDimmer
 			}
 		}
 		/// <summary>
-		/// Checks if the focused window rectangle contains the entirety of the screen this CoverForm is on.
+		/// Checks if the topmost window at the center of the screen is using the whole screen.
 		/// </summary>
-		/// <param name="focusedWindowRect"></param>
-		public void NotifyFocusedWindowBounds(Rectangle focusedWindowRect)
+		public void CheckForFullscreenApp()
 		{
-			HasFullscreenApp = focusedWindowRect.Contains(MyScreenBounds);
+			Point p = new Point(MyScreenBounds.X + MyScreenBounds.Width / 2, MyScreenBounds.Y + MyScreenBounds.Height / 2);
+			IntPtr windowHandle = NativeMethods.WindowFromPoint(new NativeMethods.POINT() { X = p.X, Y = p.Y });
+			if (windowHandle != IntPtr.Zero)
+			{
+				Rectangle windowBounds = NativeMethods.GetWindowBounds(windowHandle);
+				NativeMethods.GetWindowThreadProcessId(windowHandle, out int pid);
+				Process proc = GetProcess(pid);
+				HasFullscreenApp = !"explorer".IEquals(proc?.ProcessName) && windowBounds.Contains(MyScreenBounds);
+			}
+			else
+				HasFullscreenApp = false;
+		}
+		private Process GetProcess(int processId)
+		{
+			try
+			{
+				return Process.GetProcessById(processId);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.ToString());
+				return null;
+			}
 		}
 
 		/// <summary>
@@ -155,8 +178,11 @@ namespace TaskbarDimmer
 		/// <param name="screenBounds">Screen bounds.</param>
 		public void ScreenSync(Rectangle screenBounds)
 		{
-			MyScreenBounds = screenBounds;
-			screenBoundsChanged = true;
+			if (!MyScreenBounds.Equals(screenBounds))
+			{
+				MyScreenBounds = screenBounds;
+				screenBoundsChanged = true;
+			}
 		}
 
 		private void ApplySettings()
