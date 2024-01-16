@@ -14,7 +14,7 @@ namespace TaskbarDimmer
 	public class DimTaskbar : IDisposable
 	{
 		private int focusedProcessId;
-		private List<CoverForm> coverForms = new List<CoverForm>();
+		public List<CoverForm> coverForms = new List<CoverForm>();
 		private FocusMonitor fm = null;
 		private int myPid = Process.GetCurrentProcess().Id;
 		private Thread thrBackground;
@@ -40,7 +40,11 @@ namespace TaskbarDimmer
 								// about every 5000ms
 
 								// Get bounds of all screens
-								Rectangle[] screens = Screen.AllScreens.Select(s => s.Bounds).ToArray();
+								// 2024-01-16: Screen.Bounds does not update properly when the bounds change, but WorkingArea does.
+								Rectangle[] screens = Screen.AllScreens
+									.Select(s => s.WorkingArea)
+									.Select(wa => Screen.GetBounds(wa))
+									.ToArray();
 
 								// Add or remove CoverForms as needed...
 								while (screens.Length > coverForms.Count)

@@ -35,7 +35,8 @@ namespace TaskbarDimmer
 		private TaskbarPosition MyPosition = TaskbarPosition.None;
 		private int MySize = 0;
 		private int HitTestSize => MySize + 30;
-		private bool isLoaded = false;
+		//private bool isLoaded = false;
+		private bool screenBoundsChanged = false;
 
 		private TaskbarSettings _fallbackSettings = new TaskbarSettings() { Position = TaskbarPosition.None };
 		private TaskbarSettings settings
@@ -58,8 +59,8 @@ namespace TaskbarDimmer
 			BackColor = System.Drawing.Color.Black;
 
 			double preferredOpacity = (100 - settings.Lightness.Clamp(1, 100)) / 100d;
-			Opacity = preferredOpacity; 
-			
+			Opacity = preferredOpacity;
+
 			this.Hide();
 
 			//this.Load += CoverForm_Load;
@@ -155,6 +156,7 @@ namespace TaskbarDimmer
 		public void ScreenSync(Rectangle screenBounds)
 		{
 			MyScreenBounds = screenBounds;
+			screenBoundsChanged = true;
 		}
 
 		private void ApplySettings()
@@ -169,8 +171,9 @@ namespace TaskbarDimmer
 				MyPosition = TaskbarPosition.None; // Force bounds to be recalculated
 			}
 
-			if (MyPosition != settings.Position)
+			if (screenBoundsChanged || MyPosition != settings.Position)
 			{
+				screenBoundsChanged = false;
 				MyPosition = settings.Position;
 
 				switch (MyPosition)
@@ -236,12 +239,14 @@ namespace TaskbarDimmer
 					&& settings.Position != TaskbarPosition.Right))
 			{
 				this.Hide();
+				ShowInTaskbar = false;
 			}
 			else
 			{
 				ApplySettings();
 				this.Show();
 				this.TopMost = true;
+				ShowInTaskbar = false;
 			}
 		}
 	}

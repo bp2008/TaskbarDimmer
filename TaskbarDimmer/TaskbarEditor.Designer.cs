@@ -36,6 +36,7 @@
 			this.cbPosition = new System.Windows.Forms.ComboBox();
 			this.label3 = new System.Windows.Forms.Label();
 			this.nudSize = new System.Windows.Forms.NumericUpDown();
+			this.lblBounds = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.tbLightness)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.nudSize)).BeginInit();
 			this.SuspendLayout();
@@ -109,10 +110,20 @@
 			this.nudSize.TabIndex = 8;
 			this.nudSize.ValueChanged += new System.EventHandler(this.nudSize_ValueChanged);
 			// 
+			// lblBounds
+			// 
+			this.lblBounds.Location = new System.Drawing.Point(102, 27);
+			this.lblBounds.Name = "lblBounds";
+			this.lblBounds.Size = new System.Drawing.Size(347, 20);
+			this.lblBounds.TabIndex = 9;
+			this.lblBounds.Text = "[Bounds will show here]";
+			this.lblBounds.TextAlign = System.Drawing.ContentAlignment.TopRight;
+			// 
 			// TaskbarEditor
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.Controls.Add(this.lblBounds);
 			this.Controls.Add(this.nudSize);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.cbPosition);
@@ -139,5 +150,6 @@
 		private System.Windows.Forms.ComboBox cbPosition;
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.NumericUpDown nudSize;
+		private System.Windows.Forms.Label lblBounds;
 	}
 }

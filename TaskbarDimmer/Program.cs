@@ -18,7 +18,7 @@ namespace TaskbarDimmer
 	internal static class Program
 	{
 		private static TrayIconApplicationContext context;
-		private static DimTaskbar dimmer;
+		public static DimTaskbar dimmer;
 		public static Settings Settings = new Settings();
 		/// <summary>
 		/// The main entry point for the application.
@@ -90,6 +90,12 @@ namespace TaskbarDimmer
 				catch { }
 			}
 		}
+
+		public static void Exit()
+		{
+			context?.ExitThread();
+		}
+
 		private static bool Context_CreateContextMenu(TrayIconApplicationContext context)
 		{
 			context.AddToolStripMenuItem("&Configure " + Globals.AssemblyTitle, Context_Configure, Properties.Resources.settings64);

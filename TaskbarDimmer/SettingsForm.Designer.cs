@@ -42,6 +42,9 @@
 			this.taskbarEditor3 = new TaskbarDimmer.TaskbarEditor();
 			this.taskbarEditor2 = new TaskbarDimmer.TaskbarEditor();
 			this.taskbarEditor1 = new TaskbarDimmer.TaskbarEditor();
+			this.btnExitProgram = new System.Windows.Forms.Button();
+			this.btnOpenDataFolder = new System.Windows.Forms.Button();
+			this.btnOK = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.eventLog1)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -162,11 +165,48 @@
 			this.taskbarEditor1.Size = new System.Drawing.Size(452, 92);
 			this.taskbarEditor1.TabIndex = 4;
 			// 
+			// btnExitProgram
+			// 
+			this.btnExitProgram.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.btnExitProgram.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
+			this.btnExitProgram.Location = new System.Drawing.Point(629, 410);
+			this.btnExitProgram.Name = "btnExitProgram";
+			this.btnExitProgram.Size = new System.Drawing.Size(146, 23);
+			this.btnExitProgram.TabIndex = 94;
+			this.btnExitProgram.Text = "Exit Program";
+			this.btnExitProgram.UseVisualStyleBackColor = false;
+			this.btnExitProgram.Click += new System.EventHandler(this.btnExitProgram_Click);
+			// 
+			// btnOpenDataFolder
+			// 
+			this.btnOpenDataFolder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.btnOpenDataFolder.Location = new System.Drawing.Point(16, 410);
+			this.btnOpenDataFolder.Name = "btnOpenDataFolder";
+			this.btnOpenDataFolder.Size = new System.Drawing.Size(146, 23);
+			this.btnOpenDataFolder.TabIndex = 93;
+			this.btnOpenDataFolder.Text = "Open Data Folder";
+			this.btnOpenDataFolder.UseVisualStyleBackColor = true;
+			this.btnOpenDataFolder.Click += new System.EventHandler(this.btnOpenDataFolder_Click);
+			// 
+			// btnOK
+			// 
+			this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.btnOK.Location = new System.Drawing.Point(781, 410);
+			this.btnOK.Name = "btnOK";
+			this.btnOK.Size = new System.Drawing.Size(146, 23);
+			this.btnOK.TabIndex = 102;
+			this.btnOK.Text = "OK";
+			this.btnOK.UseVisualStyleBackColor = true;
+			this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
+			// 
 			// SettingsForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(939, 415);
+			this.ClientSize = new System.Drawing.Size(939, 445);
+			this.Controls.Add(this.btnOK);
+			this.Controls.Add(this.btnOpenDataFolder);
+			this.Controls.Add(this.btnExitProgram);
 			this.Controls.Add(this.label4);
 			this.Controls.Add(this.taskbarEditor6);
 			this.Controls.Add(this.label5);
@@ -204,5 +244,8 @@
 		private TaskbarEditor taskbarEditor2;
 		private System.Windows.Forms.Label label1;
 		private TaskbarEditor taskbarEditor1;
+		private System.Windows.Forms.Button btnOpenDataFolder;
+		private System.Windows.Forms.Button btnExitProgram;
+		private System.Windows.Forms.Button btnOK;
 	}
 }

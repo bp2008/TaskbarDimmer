@@ -16,6 +16,8 @@ namespace TaskbarDimmer
 {
 	public partial class SettingsForm : Form
 	{
+		Timer RefreshBoundsTimer = new Timer();
+		List<TaskbarEditor> Editors = new List<TaskbarEditor>();
 		public SettingsForm()
 		{
 			InitializeComponent();
@@ -30,16 +32,44 @@ namespace TaskbarDimmer
 			{
 				MessageBox.Show("Insufficient permission to access Task Scheduler.");
 			}
+
+			Editors.Add(taskbarEditor1);
+			Editors.Add(taskbarEditor2);
+			Editors.Add(taskbarEditor3);
+			Editors.Add(taskbarEditor4);
+			Editors.Add(taskbarEditor5);
+			Editors.Add(taskbarEditor6);
+
+			RefreshBoundsTimer.Interval = 250;
+			RefreshBoundsTimer.Tick += RefreshBoundsTimer_Tick;
+			RefreshBoundsTimer.Start();
+		}
+
+		private void RefreshBoundsTimer_Tick(object sender, EventArgs e)
+		{
+			for (int i = 0; i < Editors.Count; i++)
+			{
+				if (i < Program.dimmer.coverForms.Count)
+				{
+					try
+					{
+						CoverForm cf = Program.dimmer.coverForms[i];
+						Editors[i].SetBoundsLabel(cf.Bounds);
+					}
+					catch
+					{
+						Editors[i].SetBoundsLabel(null);
+					}
+				}
+				else
+					Editors[i].SetBoundsLabel(null);
+			}
 		}
 
 		private void SettingsForm_Load(object sender, EventArgs e)
 		{
-			taskbarEditor1.SetIndex(0);
-			taskbarEditor2.SetIndex(1);
-			taskbarEditor3.SetIndex(2);
-			taskbarEditor4.SetIndex(3);
-			taskbarEditor5.SetIndex(4);
-			taskbarEditor6.SetIndex(5);
+			for (int i = 0; i < Editors.Count; i++)
+				Editors[i].SetIndex(i);
 		}
 
 		private void cbStartAutomatically_CheckedChanged(object sender, EventArgs e)
@@ -118,6 +148,21 @@ namespace TaskbarDimmer
 			{
 				return ts.RootFolder.Tasks.Any(t => t.Name == TaskName);
 			}
+		}
+
+		private void btnOpenDataFolder_Click(object sender, EventArgs e)
+		{
+			ProcessRunner.Start(Globals.WritableDirectoryBase);
+		}
+
+		private void btnExitProgram_Click(object sender, EventArgs e)
+		{
+			Program.Exit();
+		}
+
+		private void btnOK_Click(object sender, EventArgs e)
+		{
+			this.Close();
 		}
 	}
 }

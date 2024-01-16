@@ -70,5 +70,16 @@ namespace TaskbarDimmer
 			lblLightness.Text = settings.Lightness.ToString();
 			Program.Settings.Save();
 		}
+
+		public void SetBoundsLabel(Rectangle? boundsOrNull)
+		{
+			if (boundsOrNull == null)
+				lblBounds.Text = "";
+			else
+			{
+				Rectangle b = boundsOrNull.Value;
+				lblBounds.Text = b.X + "," + b.Y + " " + b.Width + "x" + b.Height;
+			}
+		}
 	}
 }
