@@ -2,19 +2,35 @@
 using BPUtil.NativeWin;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static TaskbarDimmer.DimTaskbar;
+using TaskbarDimmer.Properties;
 
 namespace TaskbarDimmer
 {
-	public class CoverForm : Form
+	public partial class CoverForm : Form
 	{
+		public readonly int TaskbarIndex;
+
+		private TaskbarSettings _fallbackSettings = new TaskbarSettings() { Position = TaskbarPosition.None };
+		private TaskbarSettings settings
+		{
+			get
+			{
+				if (Program.Settings.Taskbars.Count > TaskbarIndex)
+					return Program.Settings.Taskbars[TaskbarIndex];
+				else
+					return _fallbackSettings;
+			}
+		}
+
+		#region Fields from which the visibility state is derived
 		/// <summary>
 		/// Gets the Rectangle the represents the bounds of this CoverForm's screen.
 		/// </summary>
@@ -31,52 +47,40 @@ namespace TaskbarDimmer
 		/// Gets or sets a value indicating if this CoverForm is on a screen with a focused full-screen app.
 		/// </summary>
 		public bool HasFullscreenApp { get; set; }
-
-		public readonly int TaskbarIndex;
-
+		/// <summary>
+		/// Taskbar position as of the last state sync.
+		/// </summary>
 		private TaskbarPosition MyPosition = TaskbarPosition.None;
+		/// <summary>
+		/// Size as of the last state sync.
+		/// </summary>
 		private int MySize = 0;
+		/// <summary>
+		/// Gets the hit test size (size for mouseover purposes), which is larger than the actual size.
+		/// </summary>
 		private int HitTestSize => MySize + 30;
-		//private bool isLoaded = false;
+		/// <summary>
+		/// If true, the screen bounds have just changed and the form must change its bounds in response.
+		/// </summary>
 		private bool screenBoundsChanged = false;
+		#endregion
 
-		private TaskbarSettings _fallbackSettings = new TaskbarSettings() { Position = TaskbarPosition.None };
-		private TaskbarSettings settings
-		{
-			get
-			{
-				if (Program.Settings.Taskbars.Count > TaskbarIndex)
-					return Program.Settings.Taskbars[TaskbarIndex];
-				else
-					return _fallbackSettings;
-			}
-		}
 		public CoverForm(int taskbarIndex)
 		{
 			TaskbarIndex = taskbarIndex;
-			StartPosition = FormStartPosition.Manual;
-			FormBorderStyle = FormBorderStyle.None;
-			TopMost = true;
-			ShowInTaskbar = false;
-			BackColor = System.Drawing.Color.Black;
-
-			double preferredOpacity = (100 - settings.Lightness.Clamp(1, 100)) / 100d;
-			Opacity = preferredOpacity;
-
-			this.Hide();
-
-			//this.Load += CoverForm_Load;
+			this.Text = "TaskbarDimmer_" + taskbarIndex;
+			InitializeComponent();
+			this.Visible = false;
 		}
 
-		//private void CoverForm_Load(object sender, EventArgs e)
-		//{
-		//	isLoaded = true;
-		//	//Opacity = 0.1;
-		//	//MySize = 0;
-		//	//MyPosition = TaskbarPosition.None;
-		//	//ApplySettings();
-		//	//this.Hide();
-		//}
+		private Cooldown MediumCooldown = new Cooldown(500);
+		private Cooldown LongCooldown = new Cooldown(5000);
+		private void timer_Tick(object sender, EventArgs e)
+		{
+			NotifyMousePositionChanged(Cursor.Position);
+			UpdateVisibility();
+		}
+
 		#region Make me transparent to clicks
 
 		const int WS_EX_LAYERED = 0x80000;
@@ -94,21 +98,34 @@ namespace TaskbarDimmer
 
 
 		const uint WM_NCHITTEST = 0x84;
+		const uint WM_WINDOWPOSCHANGING = 0x46;
 		const int HTTRANSPARENT = -1;
 		const int HTCLIENT = 1;
 		const int HTCAPTION = 2;
 		protected override void WndProc(ref Message m)
 		{
+			//Info("[" + System.Threading.Thread.CurrentThread.ManagedThreadId + "] WndProc " + (WM)m.Msg + " (" + m.Msg + ")");
 			if (m.Msg == WM_NCHITTEST)
 			{
 				// We want to pass mouse events on to the desktop, as if we were not even here.
 				m.Result = new IntPtr(HTTRANSPARENT);
+				return;
 			}
-			else
-				base.WndProc(ref m);
+			if (m.Msg == (int)WM.WM_WINDOWPOSCHANGED)
+			{
+				//this.Invalidate();
+				//this.Visible = false;
+			}
+			base.WndProc(ref m);
 		}
 
 		#endregion
+
+		private void Info(string message)
+		{
+			if (TaskbarIndex == 0)
+				Logger.Info(message);
+		}
 
 		/// <summary>
 		/// Checks if the mouse is hovering over this CoverForm.
@@ -197,6 +214,14 @@ namespace TaskbarDimmer
 				MyPosition = TaskbarPosition.None; // Force bounds to be recalculated
 			}
 
+			if (MyPosition == TaskbarPosition.Bottom || MyPosition == TaskbarPosition.Top)
+			{
+				if (Height != MySize)
+				{
+					//Info("Detected unwanted height change to " + Height + ". Resetting to " + MySize);
+					screenBoundsChanged = true;
+				}
+			}
 			if (screenBoundsChanged || MyPosition != settings.Position)
 			{
 				screenBoundsChanged = false;
@@ -250,13 +275,6 @@ namespace TaskbarDimmer
 
 		public void UpdateVisibility()
 		{
-			if (this.InvokeRequired)
-			{
-				this.Invoke((Action)UpdateVisibility);
-				return;
-			}
-			//if (!isLoaded)
-			//	return;
 			if (HasFullscreenApp
 				|| IsHovered
 				|| (settings.Position != TaskbarPosition.Bottom
@@ -264,15 +282,17 @@ namespace TaskbarDimmer
 					&& settings.Position != TaskbarPosition.Left
 					&& settings.Position != TaskbarPosition.Right))
 			{
-				this.Hide();
-				ShowInTaskbar = false;
+				if (this.Visible)
+					this.Visible = false;
 			}
 			else
 			{
 				ApplySettings();
-				this.Show();
-				this.TopMost = true;
-				ShowInTaskbar = false;
+				if (!this.Visible)
+				{
+					this.Visible = true;
+					this.TopMost = true;
+				}
 			}
 		}
 	}

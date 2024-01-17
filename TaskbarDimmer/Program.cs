@@ -17,7 +17,7 @@ namespace TaskbarDimmer
 {
 	internal static class Program
 	{
-		private static TrayIconApplicationContext context;
+		public static TrayIconApplication2 app;
 		public static DimTaskbar dimmer;
 		public static Settings Settings = new Settings();
 		/// <summary>
@@ -26,12 +26,15 @@ namespace TaskbarDimmer
 		[STAThread]
 		static int Main(string[] args)
 		{
+			// TODO: Try using an invisible form (one that is never shown) to create a TrayIconApplication class in BPUtil.  It should be able to invoke actions on the UI thread, create other forms, etc.
 			try
 			{
 				Directory.CreateDirectory(Globals.WritableDirectoryBase);
 				Directory.CreateDirectory(Globals.WritableDirectoryBase + "Logs/");
 				Globals.OverrideErrorFilePath(() => Globals.WritableDirectoryBase + "Logs/" + Globals.AssemblyName + "_" + DateTime.Now.Year + "_" + DateTime.Now.Month.ToString().PadLeft(2, '0') + ".txt");
 				Environment.CurrentDirectory = Globals.WritableDirectoryBase;
+
+				Logger.CatchAll();
 
 				if (args.Length == 1)
 				{
@@ -65,10 +68,15 @@ namespace TaskbarDimmer
 				Application.EnableVisualStyles();
 				Application.SetCompatibleTextRenderingDefault(false);
 
+				app = new TrayIconApplication2(Properties.Resources.favicon, Globals.AssemblyTitle + " " + Globals.AssemblyVersion, Context_DoubleClick);
+
+				app.AddToolStripMenuItem("&Configure " + Globals.AssemblyTitle, Context_Configure, Properties.Resources.settings64);
+				app.AddToolStripSeparator();
+				app.AddToolStripMenuItem("E&xit " + Globals.AssemblyTitle, (sender, e) => { app.Exit(); }, Properties.Resources.close64);
+
 				dimmer = new DimTaskbar();
 
-				context = new TrayIconApplicationContext(Properties.Resources.favicon, Globals.AssemblyTitle + " " + Globals.AssemblyVersion, Context_CreateContextMenu, Context_DoubleClick);
-				Application.Run(context);
+				app.Start();
 				return 0;
 			}
 			finally
@@ -80,12 +88,12 @@ namespace TaskbarDimmer
 				catch { }
 				try
 				{
-					dimmer.Dispose();
+					dimmer?.Dispose();
 				}
 				catch { }
 				try
 				{
-					context?.Dispose();
+					app?.Dispose();
 				}
 				catch { }
 			}
@@ -93,15 +101,7 @@ namespace TaskbarDimmer
 
 		public static void Exit()
 		{
-			context?.ExitThread();
-		}
-
-		private static bool Context_CreateContextMenu(TrayIconApplicationContext context)
-		{
-			context.AddToolStripMenuItem("&Configure " + Globals.AssemblyTitle, Context_Configure, Properties.Resources.settings64);
-			context.AddToolStripSeparator();
-			context.AddToolStripMenuItem("E&xit " + Globals.AssemblyTitle, (sender, e) => { context.ExitThread(); }, Properties.Resources.close64);
-			return true;
+			app?.Exit();
 		}
 		private static void Context_DoubleClick()
 		{

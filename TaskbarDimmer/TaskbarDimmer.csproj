@@ -57,8 +57,17 @@
     <Reference Include="UIAutomationClient" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CoverControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CoverControl.Designer.cs">
+      <DependentUpon>CoverControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="CoverForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CoverForm.Designer.cs">
+      <DependentUpon>CoverForm.cs</DependentUpon>
     </Compile>
     <Compile Include="DimTaskbar.cs" />
     <Compile Include="FocusMonitor.cs" />
@@ -77,6 +86,10 @@
     <Compile Include="TaskbarEditor.Designer.cs">
       <DependentUpon>TaskbarEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="WM.cs" />
+    <EmbeddedResource Include="CoverControl.resx">
+      <DependentUpon>CoverControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="CoverForm.resx">
       <DependentUpon>CoverForm.cs</DependentUpon>
     </EmbeddedResource>

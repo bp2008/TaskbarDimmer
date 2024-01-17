@@ -49,13 +49,23 @@ namespace TaskbarDimmer
 									.ToArray();
 
 								// Add or remove CoverForms as needed...
-								while (screens.Length > coverForms.Count)
-									coverForms.Add(new CoverForm(coverForms.Count));
-								while (screens.Length < coverForms.Count)
+								if (screens.Length != coverForms.Count)
 								{
-									CoverForm form = coverForms[coverForms.Count - 1];
-									coverForms.RemoveAt(coverForms.Count - 1);
-									form.Dispose();
+									Program.app.RunOnUiThread(() =>
+									{
+										while (screens.Length > coverForms.Count)
+										{
+											CoverForm cf = new CoverForm(coverForms.Count);
+											cf.Show();
+											coverForms.Add(cf);
+										}
+										while (screens.Length < coverForms.Count)
+										{
+											CoverForm form = coverForms[coverForms.Count - 1];
+											coverForms.RemoveAt(coverForms.Count - 1);
+											form.Dispose();
+										}
+									});
 								}
 
 								// Update screen bounds knowledge of each CoverForm
@@ -84,26 +94,17 @@ namespace TaskbarDimmer
 									coverForm.CheckForFullscreenApp();
 								}
 							}
-							// Every iteration
-							Point cursorPosition = Cursor.Position;
-							for (int i = 0; i < coverForms.Count; i++)
-							{
-								CoverForm coverForm = coverForms[i];
-								coverForm.NotifyMousePositionChanged(cursorPosition);
-								coverForm.UpdateVisibility();
-							}
 						}
 						catch (Exception ex)
 						{
-							Console.WriteLine(ex.ToString());
+							Logger.Debug(ex);
 						}
 						Thread.Sleep(100);
 					}
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine("CRITICAL ERROR in TaskbarDimmerTimer thread");
-					Console.WriteLine(ex.ToString());
+					Logger.Debug(ex, "CRITICAL ERROR in TaskbarDimmerTimer thread");
 				}
 			});
 			thrBackground.IsBackground = true;
@@ -153,19 +154,6 @@ namespace TaskbarDimmer
 		//	}
 		//}
 		#region Helpers
-		private Process GetProcess(int processId)
-		{
-			try
-			{
-				return Process.GetProcessById(processId);
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine(ex.ToString());
-				return null;
-			}
-		}
-
 		[DllImport("user32.dll")]
 		static extern IntPtr FindWindow(string className, string windowText);
 		#endregion
